@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Msana • Cava • Aser • Dolce</title>
+  <script src="https://telegram.org"></script>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --primary: #1b4332;
+      --accent: #d97706;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --tg: #0088cc;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 75px; }
+    header { background: var(--primary); color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 16px; font-weight: 700; }
+    header span { font-size: 11px; background: rgba(255,255,255,0.18); padding: 3px 8px; border-radius: 12px; }
+    .container { padding: 12px; max-width: 540px; margin: auto; }
+    .card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--border); }
+    h2, h3 { margin: 0 0 10px 0; font-size: 15px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .chip { padding: 7px 11px; border-radius: 20px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .chip.accent.active { background: var(--accent); border-color: var(--accent); }
+    .btn { width: 100%; padding: 11px; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; background: var(--primary); color: #fff; margin-top: 6px; }
+    .btn.accent { background: var(--accent); }
+    .btn.tg { background: var(--tg); }
+    .btn.danger { background: var(--danger); }
+    .btn.outline { background: #fff; color: var(--text); border: 1px solid var(--border); }
+    .btn.sm { padding: 6px 10px; font-size: 11px; width: auto; margin-top: 0; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-bottom: 8px; background: #fff; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .menu-item:last-child { border-bottom: none; }
+    .badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: #fef3c7; color: #92400e; font-weight: 700; }
+    .old-price { text-decoration: line-through; color: var(--muted); font-size: 11px; margin-right: 4px; }
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border); display: flex; z-index: 30; }
+    .nav button { flex: 1; border: none; background: none; padding: 9px 2px; font-size: 10px; font-weight: 600; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .nav button.active { color: var(--primary); }
+    .nav button span.ico { font-size: 16px; }
+    .hidden { display: none !important; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .stat-box { background: #f9fafb; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+    .stat-box small { display: block; color: var(--muted); font-size: 11px; }
+    .stat-box strong { font-size: 14px; }
+    .pos { color: var(--success); }
+    .neg { color: var(--danger); }
+    .subtabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; }
+    .subtabs button { white-space: nowrap; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-size: 12px; font-weight: 600; }
+    .subtabs button.active { background: var(--text); color: #fff; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Msana • Cava • Aser • Dolce</h1>
+  <span>Addis Ababa</span>
+</header>
+
+<div class="container">
+
+  <!-- TAB 1: ORDER & MENU -->
+  <section id="tab-order">
+    <div class="card">
+      <h3>1. Choose Location</h3>
+      <div class="chips" id="cust-branch-chips"></div>
+      <div class="chips" id="cust-cat-chips"></div>
+      <div id="cust-menu-list"></div>
+    </div>
+
+    <div class="card">
+      <h3>2. Your Cart & Delivery</h3>
+      <div id="cart-items" style="font-size:13px; color:var(--muted); margin-bottom:8px;">Cart is empty. Tap + Add above.</div>
+      <div class="row" style="margin-bottom:8px;">
+        <strong>Total:</strong>
+        <strong id="cart-total">0 ETB</strong>
+      </div>
+      <input type="text" id="ord-name" placeholder="Your Name" />
+      <input type="tel" id="ord-phone" placeholder="Phone (e.g. 0911223344)" />
+      <div class="chips" id="delivery-type-chips">
+        <button class="chip active" onclick="setDeliveryType('Motorbike', this)">🏍️ Motorbike</button>
+        <button class="chip" onclick="setDeliveryType('Bicycle', this)">🚲 Bicycle</button>
+        <button class="chip" onclick="setDeliveryType('Pickup', this)">🛍️ Pickup</button>
+      </div>
+      <input type="text" id="ord-loc" placeholder="Neighborhood / Landmark (e.g. Bole Medhanialem)" />
+      <button class="btn accent" onclick="placeOrder()">✅ Place Order & Notify Rider</button>
+    </div>
+  </section>
+
+  <!-- TAB 2: RIDERS DISPATCH -->
+  <section id="tab-riders" class="hidden">
+    <div class="card">
+      <h3>🏍️ Live Delivery Dispatch (Bikers & Bicycles)</h3>
+      <p style="font-size:12px; color:var(--muted); margin-top:0;">Registered riders: Tap Claim to accept an Addis Ababa delivery.</p>
+      <div id="rider-orders-list"></div>
+    </div>
+  </section>
+
+  <!-- TAB 3: WAITING GAME -->
+  <section id="tab-game" class="hidden">
+    <div class="card" style="text-align:center;">
+      <h3>🎲 Waiting Game — Win Free Treats!</h3>
+      <p style="font-size:12px; color:var(--muted);">Risk your free Birr Points while waiting for your order. Reach 500 pts for a Free Dolce Pastry or Coffee!</p>
+      <div style="font-size:24px; font-weight:800; color:var(--primary); margin:10px 0;">
+        <span id="game-points">100</span> Birr Points
+      </div>
+      <div class="chips" style="justify-content:center;">
+        <button class="chip active" onclick="setBet(20, this)">Risk 20</button>
+        <button class="chip" onclick="setBet(50, this)">Risk 50</button>
+        <button class="chip" onclick="setBet(100, this)">Risk 100</button>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" onclick="playGame('HIGH')">🔥 High (6–10)</button>
+        <button class="btn accent" onclick="playGame('LOW')">❄️ Low (1–5)</button>
+      </div>
+      <p id="game-result" style="font-size:13px; font-weight:700; margin-top:12px;"></p>
+      <button class="btn outline sm" onclick="resetPoints()">+ Claim Free 50 Wait Points</button>
+    </div>
+  </section>
+
+  <!-- TAB 4: PROMOS & INVITES -->
+  <section id="tab-promo" class="hidden">
+    <div class="card">
+      <h3>📢 Live Specials & Announcements</h3>
+      <div id="promo-display" style="background:#fef3c7; padding:12px; border-radius:8px; font-size:13px; margin-bottom:10px;">
+        🥐 Fresh croissants & sourdough out now at Dolce Bakery! 15% OFF lunch combos at Msana, Cava & Aser!
+      </div>
+      <h3>📲 Invite Friends to Our Bot & Pages</h3>
+      <p style="font-size:12px; color:var(--muted);">Share our bot link with friends in Addis Ababa so they can order & earn loyalty credit:</p>
+      <input type="text" id="bot-link-input" value="https://t.me" onchange="saveBotLink()" />
+      <button class="btn tg" onclick="shareBotInvite()">✈️ Share Bot Invite on Telegram</button>
+    </div>
+  </section>
+
+  <!-- TAB 5: BOSS PANEL (PIN LOCKED) -->
+  <section id="tab-boss" class="hidden">
+    <!-- PIN LOCK SCREEN -->
+    <div id="boss-lock-screen" class="card" style="text-align:center;">
+      <h3>🔒 Boss Access Only</h3>
+      <p style="font-size:12px; color:var(--muted);">Enter 4-Digit Boss PIN (Default: 1234)</p>
+      <input type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" style="text-align:center; font-size:20px; letter-spacing:8px;" />
+      <button class="btn" onclick="unlockBoss()">Unlock Boss Dashboard</button>
+    </div>
+
+    <!-- UNLOCKED BOSS CONTENT -->
+    <div id="boss-unlocked" class="hidden">
+      <div class="row" style="margin-bottom:10px;">
+        <strong style="font-size:14px;">👑 Boss Control Center</strong>
+        <button class="btn danger sm" onclick="lockBoss()">🔒 Lock</button>
+      </div>
+
+      <div class="subtabs">
+        <button class="active" onclick="switchBossSub('summary', this)">📊 Summary & Input</button>
+        <button onclick="switchBossSub('menu', this)">🍽️ Menu & Discounts</button>
+        <button onclick="switchBossSub('crm', this)">👥 Customers & Credit</button>
+        <button onclick="switchBossSub('settings', this)">⚙️ PIN & Promo</button>
+      </div>
+
+      <!-- SUB 1: SUMMARY & QUICK TAP INPUT -->
+      <div id="boss-sub-summary">
+        <div class="card">
+          <h3>⚡ Quick Tap Finance Input</h3>
+          <small style="color:var(--muted);">1. Tap Location:</small>
+          <div class="chips" id="fin-branch-chips"></div>
+          <small style="color:var(--muted);">2. Tap Category:</small>
+          <div class="chips" id="fin-cat-chips"></div>
+          <small style="color:var(--muted);">3. Tap Quick ETB or Type:</small>
+          <div class="chips">
